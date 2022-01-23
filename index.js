@@ -1,14 +1,12 @@
 require('dotenv').config();
-const mysql = require('mysql2');
+require('console.table');
+const ascii = require('asciiart-logo');
+const menu = require('./src/menu');
 
-const db = mysql.createConnection(
-  {
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PW,
-  },
-  console.log('Connection successful')
-);
+async function init() {
+  const asciiLogo = ascii({ name: 'Employee Manager' }).render();
+  console.log(asciiLogo);
+  menu();
+}
 
-db.query('SELECT * FROM EMPLOYEES', (error, results) => console.table(results));
+init();
