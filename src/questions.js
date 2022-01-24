@@ -3,7 +3,7 @@ const mainMenuQuestions = [
     type: 'list',
     message: 'What would you like to do?',
     choices: [
-      'View All Deparments',
+      'View All Departments',
       'View All Employees',
       'View All Roles',
       'Add Department',
