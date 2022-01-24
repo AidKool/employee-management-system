@@ -22,6 +22,8 @@ async function menu() {
       viewAllRoles();
       break;
     case 'Add Department':
+      const { newDepartmentName } = await askQuestions(addDeparmentQuestions);
+      insertDepartment(newDepartmentName);
       break;
     case 'Add Role':
       break;
@@ -38,22 +40,32 @@ async function menu() {
 
 function viewAllDepartments() {
   const query = 'SELECT id, name FROM DEPARTMENTS';
-  runQuery(query);
+  selectQuery(query);
 }
 
 function viewAllRoles() {
   const query =
     'SELECT ROLES.id, ROLES.title, DEPARTMENTS.name AS department, ROLES.salary FROM ROLES JOIN DEPARTMENTS ON department_id = DEPARTMENTS.id';
-  runQuery(query);
+  selectQuery(query);
 }
 
 function viewAllEmployees() {
   const query =
     "SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' ', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id;";
-  runQuery(query);
+  selectQuery(query);
 }
 
-function runQuery(query) {
+function insertDepartment(newDepartmentName) {
+  const query = 'INSERT INTO DEPARTMENTS(name) VALUES(?)';
+  db.query(query, newDepartmentName, (error) => {
+    if (error) {
+      throw new Error(error.message);
+    }
+    menu();
+  });
+}
+
+function selectQuery(query) {
   db.query(query, (error, results) => {
     if (error) {
       throw new Error(error.message);
