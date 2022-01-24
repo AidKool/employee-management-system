@@ -26,6 +26,9 @@ async function menu() {
       insertDepartment(newDepartmentName);
       break;
     case 'Add Role':
+      const { newRoleName, newRoleSalary, newRoleDepartment } =
+        await askQuestions(addRoleQuestions);
+      insertRole(newRoleName, newRoleSalary, newRoleDepartment);
       break;
     case 'Add Employee':
       break;
@@ -73,6 +76,26 @@ function selectQuery(query) {
       console.log();
       console.table(results);
       menu();
+    }
+  });
+}
+
+function insertRole(newRoleName, newRoleSalary, newRoleDepartment) {
+  const query = 'SELECT id FROM DEPARTMENTS WHERE DEPARTMENTS.name = ?';
+  db.query(query, newRoleDepartment, (error, results) => {
+    if (error) {
+      throw new Error(error.message);
+    } else {
+      const id = results[0].id;
+      const answers = [newRoleName, newRoleSalary, id];
+      const query =
+        'INSERT INTO ROLES(title, salary, department_id) VALUES(?, ?, ?)';
+      db.query(query, answers, (error) => {
+        if (error) {
+          throw new Error(error.message);
+        }
+        menu();
+      });
     }
   });
 }

@@ -1,3 +1,5 @@
+const db = require('../db/db');
+
 const mainMenuQuestions = [
   {
     type: 'list',
@@ -38,7 +40,7 @@ const addRoleQuestions = [
   {
     type: 'list',
     message: 'What is the department of the new role?',
-    choices: ['Sales', 'Engineering', 'Finance', 'Legal'],
+    choices: listDepartments(),
     name: 'newRoleDepartment',
   },
 ];
@@ -75,6 +77,20 @@ const addEmployeeQuestions = [
     name: 'newEmployeeFirstName',
   },
 ];
+
+function listDepartments() {
+  const query = 'SELECT name FROM DEPARTMENTS';
+  const departments = [];
+  db.query(query, (error, results) => {
+    if (error) {
+      throw new Error(error.message);
+    }
+    results.forEach((item) => {
+      departments.push(item.name);
+    });
+  });
+  return departments;
+}
 
 module.exports = {
   mainMenuQuestions,
