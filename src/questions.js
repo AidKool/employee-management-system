@@ -85,9 +85,7 @@ function listDepartments() {
     if (error) {
       throw new Error(error.message);
     }
-    results.forEach((item) => {
-      departments.push(item.name);
-    });
+    departments.push(...Object.values(results));
   });
   return departments;
 }
