@@ -76,6 +76,21 @@ const addEmployeeQuestions = [
   },
 ];
 
+const updateEmployeeRoleQuestions = [
+  {
+    type: 'list',
+    message: "Which employee's role do you want to update?",
+    choices: employees,
+    name: 'employeeName',
+  },
+  {
+    type: 'list',
+    message: 'Which role do you want to assign the selected employee?',
+    choices: roles,
+    name: 'roleTitle',
+  },
+];
+
 function listDepartments() {
   const query = 'SELECT name FROM DEPARTMENTS';
   return db
@@ -130,6 +145,7 @@ module.exports = {
   addDeparmentQuestions,
   addRoleQuestions,
   addEmployeeQuestions,
+  updateEmployeeRoleQuestions,
   listDepartments,
   listRoles,
   listEmployees,

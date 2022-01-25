@@ -5,6 +5,7 @@ const {
   addDeparmentQuestions,
   addRoleQuestions,
   addEmployeeQuestions,
+  updateEmployeeRoleQuestions,
   listDepartments,
   listRoles,
   listEmployees,
@@ -36,6 +37,7 @@ async function menu() {
           await addEmployee();
           break;
         case 'Update Employee Role':
+          await updateEmployeeRole();
           break;
         case 'Quit':
           console.log('Exiting the application');
@@ -165,6 +167,33 @@ async function addEmployee() {
           }
         });
       }
+    }
+  });
+}
+
+async function updateEmployeeRole() {
+  const { employeeName, roleTitle } = await askQuestions(
+    updateEmployeeRoleQuestions
+  );
+
+  const fullNameSplit = employeeName.split(' ');
+  const query = 'SELECT id FROM ROLES WHERE title = ?';
+  db.query(query, roleTitle, (error, results) => {
+    if (error) {
+      throw new Error(error.message);
+    } else {
+      const roleID = results[0].id;
+      const query =
+        'UPDATE EMPLOYEES SET role_id=? WHERE first_name=? AND last_name=?';
+      const data = [roleID, ...fullNameSplit];
+      db.query(query, data, (error, result) => {
+        if (error) {
+          throw new Error(error.message);
+        } else {
+          console.log('Employee role updated successfully');
+          menu();
+        }
+      });
     }
   });
 }
