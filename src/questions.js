@@ -1,5 +1,9 @@
 const db = require('../db/db');
 
+const departments = [];
+const roles = [];
+const employees = [];
+
 const mainMenuQuestions = [
   {
     type: 'list',
@@ -40,7 +44,7 @@ const addRoleQuestions = [
   {
     type: 'list',
     message: 'What is the department of the new role?',
-    choices: listDepartments(),
+    choices: departments,
     name: 'newRoleDepartment',
   },
 ];
@@ -57,37 +61,66 @@ const addEmployeeQuestions = [
     name: 'newEmployeeLastName',
   },
   {
-    type: 'input',
+    type: 'list',
     message: 'Enter the role of the new employee:',
+    choices: roles,
     name: 'newEmployeeRole',
   },
   {
     type: 'list',
     message: 'Who is the manager of the new employee?',
-    choices: [
-      'John Doe',
-      'Mike Chan',
-      'Ashley Rodriguez',
-      'Kevin Tupik',
-      'Kunal Singh',
-      'Malia Brown',
-      'Sarah Lourd',
-      'Tom Allen',
-    ],
+    choices: employees,
     name: 'newEmployeeFirstName',
   },
 ];
 
 function listDepartments() {
   const query = 'SELECT name FROM DEPARTMENTS';
-  const departments = [];
-  db.query(query, (error, results) => {
-    if (error) {
+  return db
+    .promise()
+    .query(query)
+    .then(([rows]) => {
+      departments.splice(0);
+      rows.forEach((name) => {
+        departments.push(name.name);
+      });
+    })
+    .catch((error) => {
       throw new Error(error.message);
-    }
-    departments.push(...Object.values(results));
-  });
-  return departments;
+    });
+}
+
+function listRoles() {
+  const query = 'SELECT title FROM ROLES';
+  return db
+    .promise()
+    .query(query)
+    .then(([rows]) => {
+      roles.splice(0);
+      rows.forEach((role) => {
+        roles.push(role.title);
+      });
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
+}
+
+function listEmployees() {
+  const query =
+    "SELECT CONCAT(first_name, ' ', last_name) AS manager FROM EMPLOYEES";
+  return db
+    .promise()
+    .query(query)
+    .then(([rows]) => {
+      employees.splice(0);
+      rows.forEach((employee) => {
+        employees.push(employee.manager);
+      });
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
 }
 
 module.exports = {
@@ -95,4 +128,7 @@ module.exports = {
   addDeparmentQuestions,
   addRoleQuestions,
   addEmployeeQuestions,
+  listDepartments,
+  listRoles,
+  listEmployees,
 };

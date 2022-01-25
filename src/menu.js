@@ -5,37 +5,45 @@ const {
   addDeparmentQuestions,
   addRoleQuestions,
   addEmployeeQuestions,
+  listDepartments,
+  listRoles,
+  listEmployees,
 } = require('./questions');
 
 const db = require('../db/db');
 
 async function menu() {
-  const { menuChoice } = await askQuestions(mainMenuQuestions);
-  switch (menuChoice) {
-    case 'View All Departments':
-      viewAllDepartments();
-      break;
-    case 'View All Employees':
-      viewAllEmployees();
-      break;
-    case 'View All Roles':
-      viewAllRoles();
-      break;
-    case 'Add Department':
-      await addDepartment();
-      break;
-    case 'Add Role':
-      await addRole();
-      break;
-    case 'Add Employee':
-      break;
-    case 'Update Employee Role':
-      break;
-    case 'Quit':
-      console.log('Exiting the application');
-      db.end();
-      return;
-  }
+  Promise.all([listDepartments(), listRoles(), listEmployees()]).then(
+    async () => {
+      const { menuChoice } = await askQuestions(mainMenuQuestions);
+      switch (menuChoice) {
+        case 'View All Departments':
+          viewAllDepartments();
+          break;
+        case 'View All Employees':
+          viewAllEmployees();
+          break;
+        case 'View All Roles':
+          viewAllRoles();
+          break;
+        case 'Add Department':
+          await addDepartment();
+          break;
+        case 'Add Role':
+          await addRole();
+          break;
+        case 'Add Employee':
+          await askQuestions(addEmployeeQuestions);
+          break;
+        case 'Update Employee Role':
+          break;
+        case 'Quit':
+          console.log('Exiting the application');
+          db.end();
+          return;
+      }
+    }
+  );
 }
 
 function viewAllDepartments() {
