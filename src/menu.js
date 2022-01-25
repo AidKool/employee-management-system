@@ -11,7 +11,7 @@ const {
   listEmployees,
 } = require('./questions');
 
-const db = require('../db/db');
+const connection = require('../db/connection');
 
 async function menu() {
   Promise.all([listDepartments(), listRoles(), listEmployees()]).then(
@@ -41,7 +41,7 @@ async function menu() {
           break;
         case 'Quit':
           console.log('Exiting the application');
-          db.end();
+          connection.end();
           return;
       }
     }
@@ -68,17 +68,18 @@ function viewAllEmployees() {
 async function addDepartment() {
   const { newDepartmentName } = await askQuestions(addDeparmentQuestions);
   const query = 'INSERT INTO DEPARTMENTS(name) VALUES(?)';
-  db.query(query, newDepartmentName, (error) => {
+  connection.query(query, newDepartmentName, (error) => {
     if (error) {
       throw new Error(error.message);
+    } else {
+      console.log('Department added successfully');
+      menu();
     }
-    console.log('Department added successfully');
-    menu();
   });
 }
 
 function selectQuery(query) {
-  db.query(query, (error, results) => {
+  connection.query(query, (error, results) => {
     if (error) {
       throw new Error(error.message);
     } else {
@@ -94,7 +95,7 @@ async function addRole() {
     addRoleQuestions
   );
   const query = 'SELECT id FROM DEPARTMENTS WHERE DEPARTMENTS.name = ?';
-  db.query(query, newRoleDepartment, (error, results) => {
+  connection.query(query, newRoleDepartment, (error, results) => {
     if (error) {
       throw new Error(error.message);
     } else {
@@ -102,7 +103,7 @@ async function addRole() {
       const answers = [newRoleName, newRoleSalary, id];
       const query =
         'INSERT INTO ROLES(title, salary, department_id) VALUES(?, ?, ?)';
-      db.query(query, answers, (error) => {
+      connection.query(query, answers, (error) => {
         if (error) {
           throw new Error(error.message);
         }
@@ -122,7 +123,7 @@ async function addEmployee() {
   } = await askQuestions(addEmployeeQuestions);
 
   const query = 'SELECT id FROM ROLES WHERE title = ?';
-  db.query(query, newEmployeeRole, (error, results) => {
+  connection.query(query, newEmployeeRole, (error, results) => {
     if (error) {
       throw new Error(error.message);
     } else {
@@ -131,7 +132,7 @@ async function addEmployee() {
         const data = [newEmployeeFirstName, newEmployeeLastName, roleID];
         const query =
           'INSERT INTO EMPLOYEES(first_name, last_name, role_id) VALUES(?,?,?)';
-        db.query(query, data, (error, result) => {
+        connection.query(query, data, (error, result) => {
           if (error) {
             throw new Error(error.message);
           } else {
@@ -143,7 +144,7 @@ async function addEmployee() {
         const fullNameSplit = newEmployeeManager.split(' ');
         const query =
           'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
-        db.query(query, fullNameSplit, (error, results) => {
+        connection.query(query, fullNameSplit, (error, results) => {
           if (error) {
             throw new Error(error.message);
           } else {
@@ -156,7 +157,7 @@ async function addEmployee() {
               roleID,
               managerID,
             ];
-            db.query(query, data, (error, results) => {
+            connection.query(query, data, (error, results) => {
               if (error) {
                 throw new Error(error.message);
               } else {
@@ -178,7 +179,7 @@ async function updateEmployeeRole() {
 
   const fullNameSplit = employeeName.split(' ');
   const query = 'SELECT id FROM ROLES WHERE title = ?';
-  db.query(query, roleTitle, (error, results) => {
+  connection.query(query, roleTitle, (error, results) => {
     if (error) {
       throw new Error(error.message);
     } else {
@@ -186,7 +187,7 @@ async function updateEmployeeRole() {
       const query =
         'UPDATE EMPLOYEES SET role_id=? WHERE first_name=? AND last_name=?';
       const data = [roleID, ...fullNameSplit];
-      db.query(query, data, (error, result) => {
+      connection.query(query, data, (error, result) => {
         if (error) {
           throw new Error(error.message);
         } else {
