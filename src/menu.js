@@ -22,13 +22,10 @@ async function menu() {
       viewAllRoles();
       break;
     case 'Add Department':
-      const { newDepartmentName } = await askQuestions(addDeparmentQuestions);
-      insertDepartment(newDepartmentName);
+      await addDepartment();
       break;
     case 'Add Role':
-      const { newRoleName, newRoleSalary, newRoleDepartment } =
-        await askQuestions(addRoleQuestions);
-      insertRole(newRoleName, newRoleSalary, newRoleDepartment);
+      await addRole();
       break;
     case 'Add Employee':
       break;
@@ -42,23 +39,24 @@ async function menu() {
 }
 
 function viewAllDepartments() {
-  const query = 'SELECT id, name FROM DEPARTMENTS';
+  const query = 'SELECT id, name FROM DEPARTMENTS ORDER BY id';
   selectQuery(query);
 }
 
 function viewAllRoles() {
   const query =
-    'SELECT ROLES.id, ROLES.title, DEPARTMENTS.name AS department, ROLES.salary FROM ROLES JOIN DEPARTMENTS ON department_id = DEPARTMENTS.id';
+    'SELECT ROLES.id, ROLES.title, DEPARTMENTS.name AS department, ROLES.salary FROM ROLES JOIN DEPARTMENTS ON department_id = DEPARTMENTS.id ORDER BY id';
   selectQuery(query);
 }
 
 function viewAllEmployees() {
   const query =
-    "SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' ', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id;";
+    "SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' ', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id ORDER BY id";
   selectQuery(query);
 }
 
-function insertDepartment(newDepartmentName) {
+async function addDepartment() {
+  const { newDepartmentName } = await askQuestions(addDeparmentQuestions);
   const query = 'INSERT INTO DEPARTMENTS(name) VALUES(?)';
   db.query(query, newDepartmentName, (error) => {
     if (error) {
@@ -80,7 +78,10 @@ function selectQuery(query) {
   });
 }
 
-function insertRole(newRoleName, newRoleSalary, newRoleDepartment) {
+async function addRole() {
+  const { newRoleName, newRoleSalary, newRoleDepartment } = await askQuestions(
+    addRoleQuestions
+  );
   const query = 'SELECT id FROM DEPARTMENTS WHERE DEPARTMENTS.name = ?';
   db.query(query, newRoleDepartment, (error, results) => {
     if (error) {
