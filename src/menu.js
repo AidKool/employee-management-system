@@ -40,7 +40,7 @@ async function menu() {
           await updateEmployeeRole();
           break;
         case 'Quit':
-          console.log('Exiting the application');
+          console.log('Exiting the application'.blue.bold);
           connection.end();
           return;
       }
@@ -72,7 +72,7 @@ async function addDepartment() {
     if (error) {
       throw new Error(error.message);
     } else {
-      console.log('Department added successfully');
+      console.log('Department added successfully'.green.bold);
       menu();
     }
   });
@@ -107,7 +107,7 @@ async function addRole() {
         if (error) {
           throw new Error(error.message);
         }
-        console.log('Role added successfully');
+        console.log('Role added successfully'.green.bold);
         menu();
       });
     }
@@ -136,7 +136,7 @@ async function addEmployee() {
           if (error) {
             throw new Error(error.message);
           } else {
-            console.log('Employee added successfully');
+            console.log('Employee added successfully'.green.bold);
             menu();
           }
         });
@@ -161,7 +161,7 @@ async function addEmployee() {
               if (error) {
                 throw new Error(error.message);
               } else {
-                console.log('Employee added successfully');
+                console.log('Employee added successfully'.green.bold);
                 menu();
               }
             });
@@ -191,7 +191,7 @@ async function updateEmployeeRole() {
         if (error) {
           throw new Error(error.message);
         } else {
-          console.log('Employee role updated successfully');
+          console.log('Employee role updated successfully'.green.bold);
           menu();
         }
       });

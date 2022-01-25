@@ -19,6 +19,7 @@
   "homepage": "https://github.com/AidKool/employee-management-system#readme",
   "dependencies": {
     "asciiart-logo": "^0.2.6",
+    "colors": "^1.4.0",
     "console.table": "^0.10.0",
     "dotenv": "^14.2.0",
     "inquirer": "^8.2.0",
