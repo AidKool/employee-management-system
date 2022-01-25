@@ -33,7 +33,7 @@ async function menu() {
           await addRole();
           break;
         case 'Add Employee':
-          await askQuestions(addEmployeeQuestions);
+          await addEmployee();
           break;
         case 'Update Employee Role':
           break;
@@ -70,6 +70,7 @@ async function addDepartment() {
     if (error) {
       throw new Error(error.message);
     }
+    console.log('Department added successfully');
     menu();
   });
 }
@@ -103,8 +104,67 @@ async function addRole() {
         if (error) {
           throw new Error(error.message);
         }
+        console.log('Role added successfully');
         menu();
       });
+    }
+  });
+}
+
+async function addEmployee() {
+  const {
+    newEmployeeFirstName,
+    newEmployeeLastName,
+    newEmployeeRole,
+    newEmployeeManager,
+  } = await askQuestions(addEmployeeQuestions);
+
+  const query = 'SELECT id FROM ROLES WHERE title = ?';
+  db.query(query, newEmployeeRole, (error, results) => {
+    if (error) {
+      throw new Error(error.message);
+    } else {
+      const roleID = results[0].id;
+      if (newEmployeeManager === 'None') {
+        const data = [newEmployeeFirstName, newEmployeeLastName, roleID];
+        const query =
+          'INSERT INTO EMPLOYEES(first_name, last_name, role_id) VALUES(?,?,?)';
+        db.query(query, data, (error, result) => {
+          if (error) {
+            throw new Error(error.message);
+          } else {
+            console.log('Employee added successfully');
+            menu();
+          }
+        });
+      } else {
+        const fullNameSplit = newEmployeeManager.split(' ');
+        const query =
+          'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
+        db.query(query, fullNameSplit, (error, results) => {
+          if (error) {
+            throw new Error(error.message);
+          } else {
+            const managerID = results[0].id;
+            const query =
+              'INSERT INTO EMPLOYEES(first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)';
+            const data = [
+              newEmployeeFirstName,
+              newEmployeeLastName,
+              roleID,
+              managerID,
+            ];
+            db.query(query, data, (error, results) => {
+              if (error) {
+                throw new Error(error.message);
+              } else {
+                console.log('Employee added successfully');
+                menu();
+              }
+            });
+          }
+        });
+      }
     }
   });
 }

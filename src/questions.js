@@ -69,8 +69,8 @@ const addEmployeeQuestions = [
   {
     type: 'list',
     message: 'Who is the manager of the new employee?',
-    choices: employees,
-    name: 'newEmployeeFirstName',
+    choices: ['None', ...employees],
+    name: 'newEmployeeManager',
   },
 ];
 
