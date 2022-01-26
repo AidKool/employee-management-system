@@ -2,10 +2,9 @@ const inquirer = require('inquirer');
 
 async function askQuestions(questions) {
   try {
-    const answers = await inquirer.prompt(questions);
-    return answers;
+    return await inquirer.prompt(questions);
   } catch (error) {
-    console.error('Error:', error);
+    throw new Error(error.message);
   }
 }
 

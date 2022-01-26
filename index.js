@@ -1,6 +1,6 @@
 require('dotenv').config();
 require('console.table');
-const colors = require('colors');
+require('colors');
 const ascii = require('asciiart-logo');
 const menu = require('./src/menu');
 
@@ -18,7 +18,7 @@ async function init() {
 
   const asciiLogo = ascii(config).right('version 1.0.0').render();
   console.log(asciiLogo);
-  menu();
+  await menu();
 }
 
 init();

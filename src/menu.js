@@ -44,7 +44,7 @@ async function menu() {
           connection.end();
           return;
       }
-    }
+    },
   );
 }
 
@@ -61,7 +61,7 @@ function viewAllRoles() {
 
 function viewAllEmployees() {
   const query =
-    "SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' ', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id ORDER BY id";
+    'SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, \' \', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id ORDER BY id';
   selectQuery(query);
 }
 
@@ -92,7 +92,7 @@ function selectQuery(query) {
 
 async function addRole() {
   const { newRoleName, newRoleSalary, newRoleDepartment } = await askQuestions(
-    addRoleQuestions
+    addRoleQuestions,
   );
   const query = 'SELECT id FROM DEPARTMENTS WHERE DEPARTMENTS.name = ?';
   connection.query(query, newRoleDepartment, (error, results) => {
@@ -132,7 +132,7 @@ async function addEmployee() {
         const data = [newEmployeeFirstName, newEmployeeLastName, roleID];
         const query =
           'INSERT INTO EMPLOYEES(first_name, last_name, role_id) VALUES(?,?,?)';
-        connection.query(query, data, (error, result) => {
+        connection.query(query, data, (error) => {
           if (error) {
             throw new Error(error.message);
           } else {
@@ -157,7 +157,7 @@ async function addEmployee() {
               roleID,
               managerID,
             ];
-            connection.query(query, data, (error, results) => {
+            connection.query(query, data, (error) => {
               if (error) {
                 throw new Error(error.message);
               } else {
@@ -174,7 +174,7 @@ async function addEmployee() {
 
 async function updateEmployeeRole() {
   const { employeeName, roleTitle } = await askQuestions(
-    updateEmployeeRoleQuestions
+    updateEmployeeRoleQuestions,
   );
 
   const fullNameSplit = employeeName.split(' ');
@@ -187,7 +187,7 @@ async function updateEmployeeRole() {
       const query =
         'UPDATE EMPLOYEES SET role_id=? WHERE first_name=? AND last_name=?';
       const data = [roleID, ...fullNameSplit];
-      connection.query(query, data, (error, result) => {
+      connection.query(query, data, (error) => {
         if (error) {
           throw new Error(error.message);
         } else {
