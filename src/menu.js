@@ -249,7 +249,7 @@ async function updateEmployeeRole() {
           throw new Error(error.message);
         } else {
           console.log(
-            'The employee role has been updated successfully'.green.bold
+            "The employee's role has been updated successfully".green.bold
           );
           menu();
         }
