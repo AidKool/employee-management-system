@@ -16,6 +16,7 @@ const mainMenuQuestions = [
       'Add Role',
       'Add Employee',
       'Update Employee Role',
+      'Update Employee Manager',
       'Quit',
     ],
     name: 'menuChoice',
@@ -91,6 +92,21 @@ const updateEmployeeRoleQuestions = [
   },
 ];
 
+const updateEmployeeManagerQuestions = [
+  {
+    type: 'list',
+    message: "Which employee's manager do you want to update?",
+    choices: employees,
+    name: 'employeeName',
+  },
+  {
+    type: 'list',
+    message: "Who do is the employee's new manager?",
+    choices: employees,
+    name: 'managerName',
+  },
+];
+
 function listDepartments() {
   const query = 'SELECT name FROM DEPARTMENTS';
   return db
@@ -146,6 +162,7 @@ module.exports = {
   addRoleQuestions,
   addEmployeeQuestions,
   updateEmployeeRoleQuestions,
+  updateEmployeeManagerQuestions,
   listDepartments,
   listRoles,
   listEmployees,

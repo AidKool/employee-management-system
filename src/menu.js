@@ -6,6 +6,7 @@ const {
   addRoleQuestions,
   addEmployeeQuestions,
   updateEmployeeRoleQuestions,
+  updateEmployeeManagerQuestions,
   listDepartments,
   listRoles,
   listEmployees,
@@ -39,12 +40,15 @@ async function menu() {
         case 'Update Employee Role':
           await updateEmployeeRole();
           break;
+        case 'Update Employee Manager':
+          await updateEmployeeManager();
+          break;
         case 'Quit':
           console.log('Exiting the application'.blue.bold);
           connection.end();
           return;
       }
-    },
+    }
   );
 }
 
@@ -61,7 +65,7 @@ function viewAllRoles() {
 
 function viewAllEmployees() {
   const query =
-    'SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, \' \', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id ORDER BY id';
+    "SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' ', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id ORDER BY id";
   selectQuery(query);
 }
 
@@ -92,7 +96,7 @@ function selectQuery(query) {
 
 async function addRole() {
   const { newRoleName, newRoleSalary, newRoleDepartment } = await askQuestions(
-    addRoleQuestions,
+    addRoleQuestions
   );
   const query = 'SELECT id FROM DEPARTMENTS WHERE DEPARTMENTS.name = ?';
   connection.query(query, newRoleDepartment, (error, results) => {
@@ -174,7 +178,7 @@ async function addEmployee() {
 
 async function updateEmployeeRole() {
   const { employeeName, roleTitle } = await askQuestions(
-    updateEmployeeRoleQuestions,
+    updateEmployeeRoleQuestions
   );
 
   const fullNameSplit = employeeName.split(' ');
@@ -191,7 +195,36 @@ async function updateEmployeeRole() {
         if (error) {
           throw new Error(error.message);
         } else {
-          console.log('Employee role updated successfully'.green.bold);
+          console.log(
+            'The employee role has been updated successfully'.green.bold
+          );
+          menu();
+        }
+      });
+    }
+  });
+}
+
+async function updateEmployeeManager() {
+  const { employeeName, managerName } = await askQuestions(
+    updateEmployeeManagerQuestions
+  );
+  const employeeNameSplit = employeeName.split(' ');
+  const managerNameSplit = managerName.split(' ');
+  const query = 'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
+  connection.query(query, managerNameSplit, (error, results) => {
+    if (error) {
+      throw new Error(error.message);
+    } else {
+      const managerID = results[0].id;
+      const data = [managerID, ...employeeNameSplit];
+      const query =
+        'UPDATE EMPLOYEES SET manager_id=? WHERE first_name=? AND last_name=?';
+      connection.query(query, data, (error) => {
+        if (error) {
+          throw new Error(error.message);
+        } else {
+          console.log("The employee's manager has been updated successfully");
           menu();
         }
       });
