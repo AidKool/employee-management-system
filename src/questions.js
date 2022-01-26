@@ -30,6 +30,14 @@ const addDepartmentQuestions = [
     type: 'input',
     message: 'Enter the name of the new department:',
     name: 'newDepartmentName',
+    validate: (userInput) => {
+      if (userInput) {
+        return true;
+      } else {
+        console.log('\nEnter a valid department name'.red.bold);
+        return false;
+      }
+    },
   },
 ];
 
@@ -38,11 +46,27 @@ const addRoleQuestions = [
     type: 'input',
     message: 'Enter the name of the new role:',
     name: 'newRoleName',
+    validate: (userInput) => {
+      if (userInput) {
+        return true;
+      } else {
+        console.log('\nEnter a valid role name'.red.bold);
+        return false;
+      }
+    },
   },
   {
     type: 'input',
     message: 'Enter the salary of the new role:',
     name: 'newRoleSalary',
+    validate: (userInput) => {
+      if (Number(userInput) > 0) {
+        return true;
+      } else {
+        console.log('\nEnter a valid salary'.red.bold);
+        return false;
+      }
+    },
   },
   {
     type: 'list',
@@ -57,11 +81,27 @@ const addEmployeeQuestions = [
     type: 'input',
     message: 'Enter the first name of the new employee:',
     name: 'newEmployeeFirstName',
+    validate: (userInput) => {
+      if (userInput) {
+        return true;
+      } else {
+        console.log('\nEnter a valid first name'.red.bold);
+        return false;
+      }
+    },
   },
   {
     type: 'input',
     message: 'Enter the last name of the new employee:',
     name: 'newEmployeeLastName',
+    validate: (userInput) => {
+      if (userInput) {
+        return true;
+      } else {
+        console.log('\nEnter a valid last name'.red.bold);
+        return false;
+      }
+    },
   },
   {
     type: 'list',
