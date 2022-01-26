@@ -180,6 +180,18 @@ async function addEmployee() {
   } = await askQuestions(addEmployeeQuestions);
 
   const query = 'SELECT id FROM ROLES WHERE title = ?';
+
+  function insertEmployee(query, data) {
+    connection.query(query, data, (error) => {
+      if (error) {
+        throw new Error(error.message);
+      } else {
+        console.log('Employee added successfully'.green.bold);
+        menu();
+      }
+    });
+  }
+
   connection.query(query, newEmployeeRole, (error, results) => {
     if (error) {
       throw new Error(error.message);
@@ -189,19 +201,12 @@ async function addEmployee() {
         const data = [newEmployeeFirstName, newEmployeeLastName, roleID];
         const query =
           'INSERT INTO EMPLOYEES(first_name, last_name, role_id) VALUES(?,?,?)';
-        connection.query(query, data, (error) => {
-          if (error) {
-            throw new Error(error.message);
-          } else {
-            console.log('Employee added successfully'.green.bold);
-            menu();
-          }
-        });
+        insertEmployee(query, data);
       } else {
-        const fullNameSplit = newEmployeeManager.split(' ');
+        const managerNameSplit = newEmployeeManager.split(' ');
         const query =
           'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
-        connection.query(query, fullNameSplit, (error, results) => {
+        connection.query(query, managerNameSplit, (error, results) => {
           if (error) {
             throw new Error(error.message);
           } else {
@@ -214,14 +219,7 @@ async function addEmployee() {
               roleID,
               managerID,
             ];
-            connection.query(query, data, (error) => {
-              if (error) {
-                throw new Error(error.message);
-              } else {
-                console.log('Employee added successfully'.green.bold);
-                menu();
-              }
-            });
+            insertEmployee(query, data);
           }
         });
       }
