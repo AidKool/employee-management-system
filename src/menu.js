@@ -2,7 +2,7 @@ const askQuestions = require('./askQuestions');
 
 const {
   mainMenuQuestions,
-  addDeparmentQuestions,
+  addDepartmentQuestions,
   addRoleQuestions,
   addEmployeeQuestions,
   updateEmployeeRoleQuestions,
@@ -66,7 +66,7 @@ function viewAllEmployees() {
 }
 
 async function addDepartment() {
-  const { newDepartmentName } = await askQuestions(addDeparmentQuestions);
+  const { newDepartmentName } = await askQuestions(addDepartmentQuestions);
   const query = 'INSERT INTO DEPARTMENTS(name) VALUES(?)';
   connection.query(query, newDepartmentName, (error) => {
     if (error) {

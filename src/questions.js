@@ -22,7 +22,7 @@ const mainMenuQuestions = [
   },
 ];
 
-const addDeparmentQuestions = [
+const addDepartmentQuestions = [
   {
     type: 'input',
     message: 'Enter the name of the new department:',
@@ -142,7 +142,7 @@ function listEmployees() {
 
 module.exports = {
   mainMenuQuestions,
-  addDeparmentQuestions,
+  addDepartmentQuestions,
   addRoleQuestions,
   addEmployeeQuestions,
   updateEmployeeRoleQuestions,
