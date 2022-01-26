@@ -12,6 +12,7 @@ const mainMenuQuestions = [
       'View All Departments',
       'View All Employees',
       'View All Roles',
+      'View Employees by Department',
       'Add Department',
       'Add Role',
       'Add Employee',
@@ -107,6 +108,15 @@ const updateEmployeeManagerQuestions = [
   },
 ];
 
+const viewEmployeesByDepartmentQuestions = [
+  {
+    type: 'list',
+    message: 'Which department do you want to see?',
+    choices: departments,
+    name: 'departmentName',
+  },
+];
+
 function listDepartments() {
   const query = 'SELECT name FROM DEPARTMENTS';
   return db
@@ -163,6 +173,7 @@ module.exports = {
   addEmployeeQuestions,
   updateEmployeeRoleQuestions,
   updateEmployeeManagerQuestions,
+  viewEmployeesByDepartmentQuestions,
   listDepartments,
   listRoles,
   listEmployees,

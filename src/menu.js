@@ -7,6 +7,7 @@ const {
   addEmployeeQuestions,
   updateEmployeeRoleQuestions,
   updateEmployeeManagerQuestions,
+  viewEmployeesByDepartmentQuestions,
   listDepartments,
   listRoles,
   listEmployees,
@@ -27,6 +28,9 @@ async function menu() {
           break;
         case 'View All Roles':
           viewAllRoles();
+          break;
+        case 'View Employees by Department':
+          await viewEmployeesByDepartment();
           break;
         case 'Add Department':
           await addDepartment();
@@ -82,8 +86,18 @@ async function addDepartment() {
   });
 }
 
-function selectQuery(query) {
-  connection.query(query, (error, results) => {
+async function viewEmployeesByDepartment() {
+  const { departmentName } = await askQuestions(
+    viewEmployeesByDepartmentQuestions
+  );
+  const query =
+    'SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS' +
+    " department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' ', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id WHERE DEPARTMENTS.name = ? ORDER BY id";
+  selectQuery(query, departmentName);
+}
+
+function selectQuery(query, data = null) {
+  connection.query(query, data, (error, results) => {
     if (error) {
       throw new Error(error.message);
     } else {
