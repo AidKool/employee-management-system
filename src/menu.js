@@ -261,28 +261,40 @@ async function updateEmployeeManager() {
     updateEmployeeManagerQuestions
   );
   const employeeNameSplit = employeeName.split(' ');
-  const managerNameSplit = managerName.split(' ');
-  const query = 'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
-  connection.query(query, managerNameSplit, (error, results) => {
-    if (error) {
-      throw new Error(error.message);
-    } else {
-      const managerID = results[0].id;
-      const data = [managerID, ...employeeNameSplit];
-      const query =
-        'UPDATE EMPLOYEES SET manager_id=? WHERE first_name=? AND last_name=?';
-      connection.query(query, data, (error) => {
-        if (error) {
-          throw new Error(error.message);
-        } else {
-          console.log(
-            "The employee's manager has been updated successfully".green.bold
-          );
-          menu();
-        }
-      });
-    }
-  });
+  const updateQuery =
+    'UPDATE EMPLOYEES SET manager_id=? WHERE first_name=? AND last_name=?';
+
+  function updateManager(query, data) {
+    connection.query(query, data, (error) => {
+      if (error) {
+        throw new Error(error.message);
+      } else {
+        console.log(
+          "The employee's manager has been updated successfully".green.bold
+        );
+        menu();
+      }
+    });
+  }
+
+  if (managerName === 'None') {
+    const managerID = null;
+    const data = [managerID, ...employeeNameSplit];
+    updateManager(updateQuery, data);
+  } else {
+    const managerNameSplit = managerName.split(' ');
+    const query = 'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
+
+    connection.query(query, managerNameSplit, (error, results) => {
+      if (error) {
+        throw new Error(error.message);
+      } else {
+        const managerID = results[0].id;
+        const data = [managerID, ...employeeNameSplit];
+        updateManager(updateQuery, data);
+      }
+    });
+  }
 }
 
 module.exports = menu;

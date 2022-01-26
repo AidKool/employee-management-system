@@ -144,7 +144,9 @@ const updateEmployeeManagerQuestions = [
   {
     type: 'list',
     message: "Who do is the employee's new manager?",
-    choices: employees,
+    choices: async () => {
+      return ['None', ...employees];
+    },
     name: 'managerName',
   },
 ];
