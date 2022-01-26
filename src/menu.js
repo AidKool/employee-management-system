@@ -8,6 +8,7 @@ const {
   updateEmployeeRoleQuestions,
   updateEmployeeManagerQuestions,
   viewEmployeesByDepartmentQuestions,
+  viewEmployeesByManagerQuestions,
   listDepartments,
   listRoles,
   listEmployees,
@@ -31,6 +32,9 @@ async function menu() {
           break;
         case 'View Employees by Department':
           await viewEmployeesByDepartment();
+          break;
+        case 'View Employees by Manager':
+          await viewEmployeesByManager();
           break;
         case 'Add Department':
           await addDepartment();
@@ -73,19 +77,6 @@ function viewAllEmployees() {
   selectQuery(query);
 }
 
-async function addDepartment() {
-  const { newDepartmentName } = await askQuestions(addDepartmentQuestions);
-  const query = 'INSERT INTO DEPARTMENTS(name) VALUES(?)';
-  connection.query(query, newDepartmentName, (error) => {
-    if (error) {
-      throw new Error(error.message);
-    } else {
-      console.log('Department added successfully'.green.bold);
-      menu();
-    }
-  });
-}
-
 async function viewEmployeesByDepartment() {
   const { departmentName } = await askQuestions(
     viewEmployeesByDepartmentQuestions
@@ -96,13 +87,47 @@ async function viewEmployeesByDepartment() {
   selectQuery(query, departmentName);
 }
 
+async function viewEmployeesByManager() {
+  const { managerName } = await askQuestions(viewEmployeesByManagerQuestions);
+  const managerNameSplit = managerName.split(' ');
+  const query = 'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
+  connection.query(query, managerNameSplit, (error, results) => {
+    if (error) {
+      throw new Error(error.message);
+    } else {
+      const managerID = results[0].id;
+      const query =
+        'SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS' +
+        " department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' ', e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id WHERE e2.id = ? ORDER BY id";
+      selectQuery(query, managerID);
+    }
+  });
+}
+
 function selectQuery(query, data = null) {
   connection.query(query, data, (error, results) => {
     if (error) {
       throw new Error(error.message);
     } else {
-      console.log();
-      console.table(results);
+      if (results.length === 0) {
+        console.log('No data found'.red.bold);
+      } else {
+        console.log();
+        console.table(results);
+      }
+      menu();
+    }
+  });
+}
+
+async function addDepartment() {
+  const { newDepartmentName } = await askQuestions(addDepartmentQuestions);
+  const query = 'INSERT INTO DEPARTMENTS(name) VALUES(?)';
+  connection.query(query, newDepartmentName, (error) => {
+    if (error) {
+      throw new Error(error.message);
+    } else {
+      console.log('Department added successfully'.green.bold);
       menu();
     }
   });

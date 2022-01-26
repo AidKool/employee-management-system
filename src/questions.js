@@ -11,8 +11,9 @@ const mainMenuQuestions = [
     choices: [
       'View All Departments',
       'View All Employees',
-      'View All Roles',
       'View Employees by Department',
+      'View Employees by Manager',
+      'View All Roles',
       'Add Department',
       'Add Role',
       'Add Employee',
@@ -117,6 +118,15 @@ const viewEmployeesByDepartmentQuestions = [
   },
 ];
 
+const viewEmployeesByManagerQuestions = [
+  {
+    type: 'list',
+    message: 'Whose subordinates do you want to see?',
+    choices: employees,
+    name: 'managerName',
+  },
+];
+
 function listDepartments() {
   const query = 'SELECT name FROM DEPARTMENTS';
   return db
@@ -174,6 +184,7 @@ module.exports = {
   updateEmployeeRoleQuestions,
   updateEmployeeManagerQuestions,
   viewEmployeesByDepartmentQuestions,
+  viewEmployeesByManagerQuestions,
   listDepartments,
   listRoles,
   listEmployees,
