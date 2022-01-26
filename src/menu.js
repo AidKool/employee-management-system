@@ -277,7 +277,9 @@ async function updateEmployeeManager() {
         if (error) {
           throw new Error(error.message);
         } else {
-          console.log("The employee's manager has been updated successfully");
+          console.log(
+            "The employee's manager has been updated successfully".green.bold
+          );
           menu();
         }
       });
