@@ -12,6 +12,8 @@ A CLI application to manage a database of employees
 
 - [License](#license)
 
+- [Requirements](#requirements)
+
 - [Contributing](#contributing)
 
 - [Install](#install)
@@ -23,6 +25,10 @@ A CLI application to manage a database of employees
 ## License
 
 Project licensed under the MIT license
+
+## Requirements
+
+This applications requires [Node.js](https://nodejs.org/en/) v.10.0.0 or greater
 
 ## Contributing
 
