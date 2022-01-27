@@ -33,10 +33,9 @@ const addDepartmentQuestions = [
     validate: (userInput) => {
       if (userInput) {
         return true;
-      } else {
-        console.log('\nEnter a valid department name'.red.bold);
-        return false;
       }
+      console.log('\nEnter a valid department name'.red.bold);
+      return false;
     },
   },
 ];
@@ -49,10 +48,9 @@ const addRoleQuestions = [
     validate: (userInput) => {
       if (userInput) {
         return true;
-      } else {
-        console.log('\nEnter a valid role name'.red.bold);
-        return false;
       }
+      console.log('\nEnter a valid role name'.red.bold);
+      return false;
     },
   },
   {
@@ -62,10 +60,9 @@ const addRoleQuestions = [
     validate: (userInput) => {
       if (Number(userInput) > 0) {
         return true;
-      } else {
-        console.log('\nEnter a valid salary'.red.bold);
-        return false;
       }
+      console.log('\nEnter a valid salary'.red.bold);
+      return false;
     },
   },
   {
@@ -84,10 +81,9 @@ const addEmployeeQuestions = [
     validate: (userInput) => {
       if (userInput) {
         return true;
-      } else {
-        console.log('\nEnter a valid first name'.red.bold);
-        return false;
       }
+      console.log('\nEnter a valid first name'.red.bold);
+      return false;
     },
   },
   {
@@ -97,10 +93,9 @@ const addEmployeeQuestions = [
     validate: (userInput) => {
       if (userInput) {
         return true;
-      } else {
-        console.log('\nEnter a valid last name'.red.bold);
-        return false;
       }
+      console.log('\nEnter a valid last name'.red.bold);
+      return false;
     },
   },
   {
@@ -112,9 +107,7 @@ const addEmployeeQuestions = [
   {
     type: 'list',
     message: 'Who is the manager of the new employee?',
-    choices: async () => {
-      return ['None', ...employees];
-    },
+    choices: async () => ['None', ...employees],
     name: 'newEmployeeManager',
   },
 ];
@@ -144,9 +137,7 @@ const updateEmployeeManagerQuestions = [
   {
     type: 'list',
     message: "Who do is the employee's new manager?",
-    choices: async () => {
-      return ['None', ...employees];
-    },
+    choices: async () => ['None', ...employees],
     name: 'managerName',
   },
 ];
