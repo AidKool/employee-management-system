@@ -22,38 +22,28 @@ async function menu() {
       const { menuChoice } = await askQuestions(mainMenuQuestions);
       switch (menuChoice) {
         case 'View All Departments':
-          viewAllDepartments();
-          break;
+          return viewAllDepartments();
         case 'View All Employees':
-          viewAllEmployees();
-          break;
+          return viewAllEmployees();
         case 'View All Roles':
-          viewAllRoles();
-          break;
+          return viewAllRoles();
         case 'View Employees by Department':
-          await viewEmployeesByDepartment();
-          break;
+          return viewEmployeesByDepartment();
         case 'View Employees by Manager':
-          await viewEmployeesByManager();
-          break;
+          return viewEmployeesByManager();
         case 'Add Department':
-          await addDepartment();
-          break;
+          return addDepartment();
         case 'Add Role':
-          await addRole();
-          break;
+          return addRole();
         case 'Add Employee':
-          await addEmployee();
-          break;
+          return addEmployee();
         case 'Update Employee Role':
-          await updateEmployeeRole();
-          break;
+          return updateEmployeeRole();
         case 'Update Employee Manager':
-          await updateEmployeeManager();
-          break;
+          return updateEmployeeManager();
         default:
           console.log('Exiting the application'.blue.bold);
-          connection.end();
+          return connection.end();
       }
     })
     .catch((error) => {
@@ -63,7 +53,7 @@ async function menu() {
 
 function viewAllDepartments() {
   const query = 'SELECT id, name FROM DEPARTMENTS ORDER BY id';
-  selectQuery(query);
+  return selectQuery(query);
 }
 
 function viewAllRoles() {
@@ -71,7 +61,7 @@ function viewAllRoles() {
     'SELECT ROLES.id, ROLES.title, DEPARTMENTS.name AS department,' +
     ' ROLES.salary FROM ROLES JOIN DEPARTMENTS ON department_id =' +
     ' DEPARTMENTS.id ORDER BY id';
-  selectQuery(query);
+  return selectQuery(query);
 }
 
 function viewAllEmployees() {
@@ -81,7 +71,7 @@ function viewAllEmployees() {
     ' e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON DEPARTMENTS.id' +
     ' = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT' +
     ' JOIN EMPLOYEES e2 ON e1.manager_id = e2.id ORDER BY id';
-  selectQuery(query);
+  return selectQuery(query);
 }
 
 async function viewEmployeesByDepartment() {
@@ -95,7 +85,7 @@ async function viewEmployeesByDepartment() {
     ' = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id = e1.role_id LEFT' +
     ' JOIN EMPLOYEES e2 ON e1.manager_id = e2.id WHERE DEPARTMENTS.name = ?' +
     ' ORDER BY id';
-  selectQuery(query, departmentName);
+  return selectQuery(query, departmentName);
 }
 
 async function viewEmployeesByManager() {
@@ -112,7 +102,7 @@ async function viewEmployeesByManager() {
     ' = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id WHERE' +
     ' e2.id = ? ORDER BY id';
 
-  connection
+  return connection
     .promise()
     .query(selectIDQuery, managerNameSplit)
     .then(([rows]) => rows[0])
@@ -123,7 +113,7 @@ async function viewEmployeesByManager() {
 }
 
 function selectQuery(query, data = null) {
-  connection
+  return connection
     .promise()
     .query(query, data)
     .then(([rows]) => {
@@ -241,21 +231,25 @@ async function addEmployee() {
 }
 
 async function updateEmployeeRole() {
-  const { employeeName, roleTitle: newEmployeeRole } = await askQuestions(
+  const { employeeName, newEmployeeRole } = await askQuestions(
     updateEmployeeRoleQuestions
   );
-
   const employeeNameSplit = employeeName.split(' ');
   const selectRoleIDQuery = 'SELECT id FROM ROLES WHERE title = ?';
   const updateEmployeeQuery =
     'UPDATE EMPLOYEES SET role_id=? WHERE first_name=? AND last_name=?';
 
   return connection
+    .promise()
     .query(selectRoleIDQuery, newEmployeeRole)
     .then(([rows]) => rows[0])
     .then(({ id }) => {
       const employeeData = [id, ...employeeNameSplit];
-      return connection.promise().query(updateEmployeeQuery, employeeData);
+      connection.promise().query(updateEmployeeQuery, employeeData);
+      console.log(
+        "The employee's role has been updated successfully".green.bold
+      );
+      return menu();
     })
     .catch((error) => {
       throw new Error(error.message);
