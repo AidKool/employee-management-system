@@ -184,13 +184,44 @@ async function addEmployee() {
     newEmployeeManager,
   } = await askQuestions(addEmployeeQuestions);
 
+  const managerNameSplit = newEmployeeManager.split(' ');
+
   const selectRoleIDQuery = 'SELECT id FROM ROLES WHERE title = ?';
-  const insertEmployeeQuery =
-    'INSERT INTO EMPLOYEES(first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)';
   const selectManagerIDQuery =
     'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
+  const insertEmployeeQuery =
+    'INSERT INTO EMPLOYEES(first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)';
 
-  let roleID = 0;
+  Promise.all([findRoleID(), findManagerID()])
+    .then((results) => {
+      const { id: roleID } = results[0];
+      const { id: managerID } = results[1];
+      const employeeData = [
+        newEmployeeFirstName,
+        newEmployeeLastName,
+        roleID,
+        managerID,
+      ];
+      return insertEmployee(insertEmployeeQuery, employeeData);
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
+
+  function findRoleID() {
+    return connection
+      .promise()
+      .query(selectRoleIDQuery, newEmployeeRole)
+      .then(([rows]) => rows[0]);
+  }
+
+  function findManagerID() {
+    return connection
+      .promise()
+      .query(selectManagerIDQuery, managerNameSplit)
+      .then(([rows]) => rows[0])
+      .catch(() => [{ id: null }]);
+  }
 
   function insertEmployee(query, data) {
     connection
@@ -204,32 +235,6 @@ async function addEmployee() {
         throw new Error(error.message);
       });
   }
-
-  connection
-    .promise()
-    .query(selectRoleIDQuery, newEmployeeRole)
-    .then(([rows]) => rows[0])
-    .then(({ id }) => {
-      roleID = id;
-      const managerNameSplit = newEmployeeManager.split(' ');
-      return connection
-        .promise()
-        .query(selectManagerIDQuery, managerNameSplit)
-        .then(([rows]) => rows[0])
-        .catch(() => [{ id: null }]);
-    })
-    .then(({ id: managerID }) => {
-      const employeeData = [
-        newEmployeeFirstName,
-        newEmployeeLastName,
-        roleID,
-        managerID,
-      ];
-      return insertEmployee(insertEmployeeQuery, employeeData);
-    })
-    .catch((error) => {
-      throw new Error(error.message);
-    });
 }
 
 async function updateEmployeeRole() {
