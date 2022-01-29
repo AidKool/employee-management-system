@@ -190,16 +190,8 @@ async function addEmployee() {
   const selectManagerIDQuery =
     'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
 
-  // function insertEmployee(query, data) {
-  //   connection.query(query, data, (error) => {
-  //     if (error) {
-  //       throw new Error(error.message);
-  //     } else {
-  //       console.log('Employee added successfully'.green.bold);
-  //       menu();
-  //     }
-  //   });
-  // }
+  let roleID = 0;
+
   function insertEmployee(query, data) {
     connection
       .promise()
@@ -217,11 +209,15 @@ async function addEmployee() {
     .promise()
     .query(selectRoleIDQuery, newEmployeeRole)
     .then(([rows]) => rows[0])
-    .then(({ id: roleID }) => {
+    .then(({ id }) => {
+      roleID = id;
       const managerNameSplit = newEmployeeManager.split(' ');
-      return connection.promise().query(selectManagerIDQuery, managerNameSplit);
+      return connection
+        .promise()
+        .query(selectManagerIDQuery, managerNameSplit)
+        .then(([rows]) => rows[0])
+        .catch(() => [{ id: null }]);
     })
-    .then(([rows]) => rows[0])
     .then(({ id: managerID }) => {
       const employeeData = [
         newEmployeeFirstName,
@@ -234,45 +230,6 @@ async function addEmployee() {
     .catch((error) => {
       throw new Error(error.message);
     });
-
-  // connection.query(selectIDQuery, newEmployeeRole, (error, results) => {
-  //   if (error) {
-  //     throw new Error(error.message);
-  //   } else {
-  //     const { id: roleID } = results[0];
-  //     if (newEmployeeManager === 'None') {
-  //       const employeeData = [
-  //         newEmployeeFirstName,
-  //         newEmployeeLastName,
-  //         roleID,
-  //       ];
-  //       const query =
-  //         'INSERT INTO EMPLOYEES(first_name, last_name, role_id) VALUES(?,?,?)';
-  //       insertEmployee(query, employeeData);
-  //     } else {
-  //       const managerNameSplit = newEmployeeManager.split(' ');
-  //       const query =
-  //         'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
-  //       // eslint-disable-next-line no-shadow
-  //       connection.query(query, managerNameSplit, (error, results) => {
-  //         if (error) {
-  //           throw new Error(error.message);
-  //         } else {
-  //           const { id: managerID } = results[0];
-  //           const insertEmployeeQuery =
-  //             'INSERT INTO EMPLOYEES(first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)';
-  //           const employeeData = [
-  //             newEmployeeFirstName,
-  //             newEmployeeLastName,
-  //             roleID,
-  //             managerID,
-  //           ];
-  //           insertEmployee(insertEmployeeQuery, employeeData);
-  //         }
-  //       });
-  //     }
-  //   }
-  // });
 }
 
 async function updateEmployeeRole() {
