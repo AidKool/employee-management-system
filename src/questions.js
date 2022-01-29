@@ -123,7 +123,7 @@ const updateEmployeeRoleQuestions = [
     type: 'list',
     message: 'Which role do you want to assign the selected employee?',
     choices: roles,
-    name: 'roleTitle',
+    name: 'newEmployeeRole',
   },
 ];
 

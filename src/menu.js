@@ -238,33 +238,25 @@ async function addEmployee() {
 }
 
 async function updateEmployeeRole() {
-  const { employeeName, roleTitle } = await askQuestions(
+  const { employeeName, roleTitle: newEmployeeRole } = await askQuestions(
     updateEmployeeRoleQuestions
   );
 
-  const fullNameSplit = employeeName.split(' ');
-  const query = 'SELECT id FROM ROLES WHERE title = ?';
-  connection.query(query, roleTitle, (error, results) => {
-    if (error) {
+  const employeeNameSplit = employeeName.split(' ');
+  const selectRoleIDQuery = 'SELECT id FROM ROLES WHERE title = ?';
+  const updateEmployeeQuery =
+    'UPDATE EMPLOYEES SET role_id=? WHERE first_name=? AND last_name=?';
+
+  return connection
+    .query(selectRoleIDQuery, newEmployeeRole)
+    .then(([rows]) => rows[0])
+    .then(({ id }) => {
+      const employeeData = [id, ...employeeNameSplit];
+      return connection.promise().query(updateEmployeeQuery, employeeData);
+    })
+    .catch((error) => {
       throw new Error(error.message);
-    } else {
-      const { id: roleID } = results[0];
-      const updateEmployeeQuery =
-        'UPDATE EMPLOYEES SET role_id=? WHERE first_name=? AND last_name=?';
-      const employeeData = [roleID, ...fullNameSplit];
-      // eslint-disable-next-line no-shadow
-      connection.query(updateEmployeeQuery, employeeData, (error) => {
-        if (error) {
-          throw new Error(error.message);
-        } else {
-          console.log(
-            "The employee's role has been updated successfully".green.bold
-          );
-          menu();
-        }
-      });
-    }
-  });
+    });
 }
 
 async function updateEmployeeManager() {
@@ -272,39 +264,44 @@ async function updateEmployeeManager() {
     updateEmployeeManagerQuestions
   );
   const employeeNameSplit = employeeName.split(' ');
-  const updateQuery =
+  const managerNameSplit = managerName.split(' ');
+
+  const updateEmployeeQuery =
     'UPDATE EMPLOYEES SET manager_id=? WHERE first_name=? AND last_name=?';
+  const selectManagerIDQuery =
+    'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
+
+  Promise.all([findManagerID()])
+    .then((results) => {
+      const { id: managerID } = results[0];
+      const employeeData = [managerID, ...employeeNameSplit];
+      return updateManager(updateEmployeeQuery, employeeData);
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
+
+  function findManagerID() {
+    return connection
+      .promise()
+      .query(selectManagerIDQuery, managerNameSplit)
+      .then(([rows]) => rows[0])
+      .catch(() => [{ id: null }]);
+  }
 
   function updateManager(query, data) {
-    connection.query(query, data, (error) => {
-      if (error) {
-        throw new Error(error.message);
-      } else {
+    return connection
+      .promise()
+      .query(query, data)
+      .then(() => {
         console.log(
           "The employee's manager has been updated successfully".green.bold
         );
-        menu();
-      }
-    });
-  }
-
-  if (managerName === 'None') {
-    const managerID = null;
-    const employeeData = [managerID, ...employeeNameSplit];
-    updateManager(updateQuery, employeeData);
-  } else {
-    const managerNameSplit = managerName.split(' ');
-    const query = 'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
-
-    connection.query(query, managerNameSplit, (error, results) => {
-      if (error) {
+        return menu();
+      })
+      .catch((error) => {
         throw new Error(error.message);
-      } else {
-        const managerID = results[0].id;
-        const employeeData = [managerID, ...employeeNameSplit];
-        updateManager(updateQuery, employeeData);
-      }
-    });
+      });
   }
 }
 
