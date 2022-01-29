@@ -167,7 +167,7 @@ function listDepartments() {
     .query(query)
     .then(([rows]) => {
       departments.splice(0);
-      rows.forEach((name) => {
+      return rows.forEach((name) => {
         departments.push(name.name);
       });
     })
@@ -183,7 +183,7 @@ function listRoles() {
     .query(query)
     .then(([rows]) => {
       roles.splice(0);
-      rows.forEach((role) => {
+      return rows.forEach((role) => {
         roles.push(role.title);
       });
     })
@@ -200,7 +200,7 @@ function listEmployees() {
     .query(query)
     .then(([rows]) => {
       employees.splice(0);
-      rows.forEach((employee) => {
+      return rows.forEach((employee) => {
         employees.push(employee.manager);
       });
     })

@@ -17,8 +17,8 @@ const {
 const connection = require('../db/connection');
 
 async function menu() {
-  Promise.all([listDepartments(), listRoles(), listEmployees()]).then(
-    async () => {
+  Promise.all([listDepartments(), listRoles(), listEmployees()])
+    .then(async () => {
       const { menuChoice } = await askQuestions(mainMenuQuestions);
       switch (menuChoice) {
         case 'View All Departments':
@@ -55,8 +55,10 @@ async function menu() {
           console.log('Exiting the application'.blue.bold);
           connection.end();
       }
-    }
-  );
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
 }
 
 function viewAllDepartments() {
@@ -99,52 +101,54 @@ async function viewEmployeesByDepartment() {
 async function viewEmployeesByManager() {
   const { managerName } = await askQuestions(viewEmployeesByManagerQuestions);
   const managerNameSplit = managerName.split(' ');
+
   const selectIDQuery =
     'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
-  connection.query(selectIDQuery, managerNameSplit, (error, results) => {
-    if (error) {
+  const selectEmployeesQuery =
+    'SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS' +
+    " department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' '," +
+    ' e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON' +
+    ' DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id' +
+    ' = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id WHERE' +
+    ' e2.id = ? ORDER BY id';
+
+  connection
+    .promise()
+    .query(selectIDQuery, managerNameSplit)
+    .then(([rows]) => rows[0])
+    .then(({ id }) => selectQuery(selectEmployeesQuery, id))
+    .catch((error) => {
       throw new Error(error.message);
-    } else {
-      const { id: managerID } = results[0];
-      const selectEmployeesQuery =
-        'SELECT e1.id, e1.first_name, e1.last_name, DEPARTMENTS.name AS' +
-        " department, ROLES.title, ROLES.salary, CONCAT(e2.first_name, ' '," +
-        ' e2.last_name) AS manager FROM DEPARTMENTS JOIN ROLES ON' +
-        ' DEPARTMENTS.id = ROLES.department_id JOIN EMPLOYEES e1 ON ROLES.id' +
-        ' = e1.role_id LEFT JOIN EMPLOYEES e2 ON e1.manager_id = e2.id WHERE' +
-        ' e2.id = ? ORDER BY id';
-      selectQuery(selectEmployeesQuery, managerID);
-    }
-  });
+    });
 }
 
 function selectQuery(query, data = null) {
-  connection.query(query, data, (error, results) => {
-    if (error) {
+  connection
+    .promise()
+    .query(query, data)
+    .then(([rows]) => {
+      console.log();
+      console.table(rows);
+      return menu();
+    })
+    .catch((error) => {
       throw new Error(error.message);
-    } else {
-      if (results.length === 0) {
-        console.log('No data found'.red.bold);
-      } else {
-        console.log();
-        console.table(results);
-      }
-      menu();
-    }
-  });
+    });
 }
 
 async function addDepartment() {
   const { newDepartmentName } = await askQuestions(addDepartmentQuestions);
   const query = 'INSERT INTO DEPARTMENTS(name) VALUES(?)';
-  connection.query(query, newDepartmentName, (error) => {
-    if (error) {
-      throw new Error(error.message);
-    } else {
+  connection
+    .promise()
+    .query(query, newDepartmentName)
+    .then(() => {
       console.log('Department added successfully'.green.bold);
-      menu();
-    }
-  });
+      return menu();
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
 }
 
 async function addRole() {
@@ -152,25 +156,24 @@ async function addRole() {
     addRoleQuestions
   );
   const selectIDQuery = 'SELECT id FROM DEPARTMENTS WHERE DEPARTMENTS.name = ?';
-  connection.query(selectIDQuery, newRoleDepartment, (error, results) => {
-    if (error) {
+  const insertRoleQuery =
+    'INSERT INTO ROLES(title, salary, department_id) VALUES(?, ?, ?)';
+
+  connection
+    .promise()
+    .query(selectIDQuery, newRoleDepartment)
+    .then(([rows]) => rows[0])
+    .then(({ id }) => {
+      const roleData = [newRoleName, newRoleSalary, id];
+      return connection.promise().query(insertRoleQuery, roleData);
+    })
+    .then(() => {
+      console.log('Role added successfully'.green.bold);
+      return menu();
+    })
+    .catch((error) => {
       throw new Error(error.message);
-    } else {
-      const { id } = results[0];
-      const answers = [newRoleName, newRoleSalary, id];
-      const insertRoleQuery =
-        'INSERT INTO ROLES(title, salary, department_id) VALUES(?, ?, ?)';
-      // eslint-disable-next-line no-shadow
-      connection.query(insertRoleQuery, answers, (error) => {
-        if (error) {
-          throw new Error(error.message);
-        } else {
-          console.log('Role added successfully'.green.bold);
-          menu();
-        }
-      });
-    }
-  });
+    });
 }
 
 async function addEmployee() {
@@ -181,57 +184,95 @@ async function addEmployee() {
     newEmployeeManager,
   } = await askQuestions(addEmployeeQuestions);
 
-  const selectIDQuery = 'SELECT id FROM ROLES WHERE title = ?';
+  const selectRoleIDQuery = 'SELECT id FROM ROLES WHERE title = ?';
+  const insertEmployeeQuery =
+    'INSERT INTO EMPLOYEES(first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)';
+  const selectManagerIDQuery =
+    'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
 
+  // function insertEmployee(query, data) {
+  //   connection.query(query, data, (error) => {
+  //     if (error) {
+  //       throw new Error(error.message);
+  //     } else {
+  //       console.log('Employee added successfully'.green.bold);
+  //       menu();
+  //     }
+  //   });
+  // }
   function insertEmployee(query, data) {
-    connection.query(query, data, (error) => {
-      if (error) {
-        throw new Error(error.message);
-      } else {
+    connection
+      .promise()
+      .query(query, data)
+      .then(() => {
         console.log('Employee added successfully'.green.bold);
-        menu();
-      }
-    });
+        return menu();
+      })
+      .catch((error) => {
+        throw new Error(error.message);
+      });
   }
 
-  connection.query(selectIDQuery, newEmployeeRole, (error, results) => {
-    if (error) {
+  connection
+    .promise()
+    .query(selectRoleIDQuery, newEmployeeRole)
+    .then(([rows]) => rows[0])
+    .then(({ id: roleID }) => {
+      const managerNameSplit = newEmployeeManager.split(' ');
+      return connection.promise().query(selectManagerIDQuery, managerNameSplit);
+    })
+    .then(([rows]) => rows[0])
+    .then(({ id: managerID }) => {
+      const employeeData = [
+        newEmployeeFirstName,
+        newEmployeeLastName,
+        roleID,
+        managerID,
+      ];
+      return insertEmployee(insertEmployeeQuery, employeeData);
+    })
+    .catch((error) => {
       throw new Error(error.message);
-    } else {
-      const { id: roleID } = results[0];
-      if (newEmployeeManager === 'None') {
-        const employeeData = [
-          newEmployeeFirstName,
-          newEmployeeLastName,
-          roleID,
-        ];
-        const query =
-          'INSERT INTO EMPLOYEES(first_name, last_name, role_id) VALUES(?,?,?)';
-        insertEmployee(query, employeeData);
-      } else {
-        const managerNameSplit = newEmployeeManager.split(' ');
-        const query =
-          'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
-        // eslint-disable-next-line no-shadow
-        connection.query(query, managerNameSplit, (error, results) => {
-          if (error) {
-            throw new Error(error.message);
-          } else {
-            const { id: managerID } = results[0];
-            const insertEmployeeQuery =
-              'INSERT INTO EMPLOYEES(first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)';
-            const employeeData = [
-              newEmployeeFirstName,
-              newEmployeeLastName,
-              roleID,
-              managerID,
-            ];
-            insertEmployee(insertEmployeeQuery, employeeData);
-          }
-        });
-      }
-    }
-  });
+    });
+
+  // connection.query(selectIDQuery, newEmployeeRole, (error, results) => {
+  //   if (error) {
+  //     throw new Error(error.message);
+  //   } else {
+  //     const { id: roleID } = results[0];
+  //     if (newEmployeeManager === 'None') {
+  //       const employeeData = [
+  //         newEmployeeFirstName,
+  //         newEmployeeLastName,
+  //         roleID,
+  //       ];
+  //       const query =
+  //         'INSERT INTO EMPLOYEES(first_name, last_name, role_id) VALUES(?,?,?)';
+  //       insertEmployee(query, employeeData);
+  //     } else {
+  //       const managerNameSplit = newEmployeeManager.split(' ');
+  //       const query =
+  //         'SELECT id FROM EMPLOYEES WHERE first_name=? AND last_name=?';
+  //       // eslint-disable-next-line no-shadow
+  //       connection.query(query, managerNameSplit, (error, results) => {
+  //         if (error) {
+  //           throw new Error(error.message);
+  //         } else {
+  //           const { id: managerID } = results[0];
+  //           const insertEmployeeQuery =
+  //             'INSERT INTO EMPLOYEES(first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)';
+  //           const employeeData = [
+  //             newEmployeeFirstName,
+  //             newEmployeeLastName,
+  //             roleID,
+  //             managerID,
+  //           ];
+  //           insertEmployee(insertEmployeeQuery, employeeData);
+  //         }
+  //       });
+  //     }
+  //   }
+  // });
 }
 
 async function updateEmployeeRole() {
