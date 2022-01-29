@@ -127,15 +127,18 @@ function selectQuery(query, data = null) {
     .promise()
     .query(query, data)
     .then(([rows]) => {
-      console.log();
-      console.table(rows);
+      if (rows.length > 0) {
+        console.log();
+        console.table(rows);
+      } else {
+        console.log('No data found'.red.bold);
+      }
       return menu();
     })
     .catch((error) => {
       throw new Error(error.message);
     });
 }
-
 async function addDepartment() {
   const { newDepartmentName } = await askQuestions(addDepartmentQuestions);
   const query = 'INSERT INTO DEPARTMENTS(name) VALUES(?)';
