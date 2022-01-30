@@ -209,11 +209,16 @@ async function addEmployee() {
   }
 
   function findManagerID() {
+    if (newEmployeeManager === 'None') {
+      return Promise.resolve({ id: null });
+    }
     return connection
       .promise()
       .query(selectManagerIDQuery, managerNameSplit)
       .then(([rows]) => rows[0])
-      .catch(() => [{ id: null }]);
+      .catch((error) => {
+        throw new Error(error.message);
+      });
   }
 
   function insertEmployee(query, data) {
@@ -279,11 +284,16 @@ async function updateEmployeeManager() {
     });
 
   function findManagerID() {
+    if (managerName === 'None') {
+      return Promise.resolve({ id: null });
+    }
     return connection
       .promise()
       .query(selectManagerIDQuery, managerNameSplit)
       .then(([rows]) => rows[0])
-      .catch(() => [{ id: null }]);
+      .catch((error) => {
+        throw new Error(error.message);
+      });
   }
 
   function updateManager(query, data) {
